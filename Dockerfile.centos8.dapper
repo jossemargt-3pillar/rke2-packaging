@@ -1,11 +1,10 @@
 FROM centos:8
 
-RUN for i in $(ls /etc/yum.repos.d); do \
-        sed -i -e "s/mirrorlist.*//g" /etc/yum.repos.d/$i && \
-        sed -i -e "s/#baseurl=http:\/\/mirror.centos.org/baseurl=http:\/\/linuxsoft.cern.ch\/centos-vault\//g" /etc/yum.repos.d/$i; \
-    done && \
-    yum install -y epel-release && \
-    yum -y install yum-utils rpm-build spectool git jq
+RUN echo 'timeout=120' >> /etc/yum.conf \
+    && find /etc/yum.repos.d -type f -name '*.repo' -exec \
+        sed -i -e '/mirrorlist.*/d' -e 's%#baseurl=http://mirror.centos.org%baseurl=http://vault.centos.org%g' {} \; \
+    && yum install -y epel-release \
+    && yum install -y yum-utils rpm-build spectool git jq
 
 ENV DAPPER_SOURCE /source
 ENV DAPPER_OUTPUT ./dist
